@@ -369,15 +369,6 @@ function AdventureGame() {
         {/* Header */}
         <div className="flex justify-between items-center mb-12 animate-fadeIn">
           <div className="flex items-center gap-6">
-            <div className="hidden sm:block relative">
-              <Image
-                src="/questlearn.png"
-                alt="QuestLearn Logo"
-                fill
-                className="drop-shadow-lg object-contain" // Changed from object-center to object-contain
-                priority
-              />
-            </div>
             <div>
               <h1 className="text-6xl font-extrabold text-primary">
                 QuestLearn

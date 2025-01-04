@@ -1,6 +1,10 @@
-# QuestLearn - Interactive AI-Powered Learning Adventures
+# QuestLearn - Your AI Learning Companion
 
-QuestLearn is an interactive learning platform that combines the power of AI with engaging storytelling to create personalized educational experiences. Users can explore any topic through a choose-your-own-adventure style interface, with AI-generated content adapting to their choices and learning progress.
+> Transforming education through interactive AI-powered storytelling
+
+QuestLearn revolutionizes learning by combining advanced AI technology with engaging storytelling to create 
+personalized educational experiences. Choose any topic and embark on an interactive journey where your 
+choices shape your learning path.
 
 ## 🌟 Features
 

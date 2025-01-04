@@ -6,14 +6,22 @@ export interface AIConfig {
 }
 
 export interface AIResponse {
-  story: string;
-  choices: {
+  story?: string;
+  choices?: {
     text: string;
     expectedOutcome: string;
   }[];
-  metrics: {
+  metrics?: {
     comprehensionLevel: number;
     topicsCovered: string[];
     suggestedFocus: string;
   };
+  // Add new properties for final review
+  choiceAnalysis?: {
+    choice: string;
+    explanation: string;
+  }[];
+  overallReview?: string;
+  rating?: number;
+  suggestedTopics?: string[];
 }

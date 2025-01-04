@@ -1,13 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAIResponse } from '../../src/services/ai/providers';
-import { AIConfig } from '../../src/types/ai';
-
-const generationConfig = {
-    temperature: 1,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 8192,
-};
+import { AIConfig, AIResponse } from '../../src/types/ai';
 
 interface GameHistory {
     story: string;
@@ -180,10 +173,10 @@ Provide a friendly educational review following this structure:
         const response = await getAIResponse(aiConfig.provider, aiConfig.apiKey, prompt);
         // Transform response to EnhancedReview format
         return {
-            choiceAnalysis: response.choiceAnalysis,
-            overallReview: response.overallReview,
-            rating: response.rating,
-            suggestedTopics: response.suggestedTopics
+            choiceAnalysis: response.choiceAnalysis || [],
+            overallReview: response.overallReview || 'Unable to generate review.',
+            rating: response.rating || 0,
+            suggestedTopics: response.suggestedTopics || []
         };
     } catch (error) {
         console.error('AI Service Error:', error);

@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuestLearn - Interactive AI-Powered Learning Adventures
 
-## Getting Started
+QuestLearn is an interactive learning platform that combines the power of AI with engaging storytelling to create personalized educational experiences. Users can explore any topic through a choose-your-own-adventure style interface, with AI-generated content adapting to their choices and learning progress.
 
-First, run the development server:
+## 🌟 Features
+
+- **Multiple AI Providers**: Support for both Google Gemini and Groq AI models
+- **Dynamic Story Generation**: AI-powered narrative creation based on chosen topics
+- **Interactive Learning**: Choose-your-own-adventure style progression
+- **Adaptive Content**: Content difficulty adjusts based on user comprehension
+- **Progress Tracking**: Detailed metrics and learning journey analysis
+- **Custom Responses**: Users can write their own responses beyond preset choices
+- **Secure API Key Management**: Local storage for API keys with an intuitive sidebar interface
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- API keys for either Google Gemini or Groq (or both)
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/quest-learn.git
+
+# Navigate to project directory
+cd quest-learn
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Open the application in your browser
+2. Click the sidebar toggle on the left
+3. Enter your API keys for either Gemini or Groq
+4. Select your preferred AI provider
+5. Enter a learning topic to begin
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Tech Stack
 
-## Learn More
+- **Frontend**: Next.js, React, TypeScript
+- **Styling**: Tailwind CSS
+- **AI Integration**: Google Gemini API, Groq API
+- **State Management**: React Hooks
+- **API Routes**: Next.js API Routes
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Configure API**: Set up your preferred AI provider and API key
+2. **Select Topic**: Enter any educational topic you want to explore
+3. **Start Journey**: Begin your interactive learning adventure
+4. **Make Choices**: Select from AI-generated choices or write your own responses
+5. **Track Progress**: Review your learning journey and comprehension metrics
+6. **Get Insights**: Receive personalized feedback and suggested topics
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🏗️ Project Structure
 
-## Deploy on Vercel
+```
+quest-learn/
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   └── APIKeyManager.tsx
+│   │   ├── AdventureGame.tsx
+│   │   └── APIKeyInput.tsx
+│   ├── services/
+│   │   └── ai/
+│   │       └── providers.ts
+│   └── types/
+│       └── ai.ts
+├── public/
+│   └── questlearn.png
+└── tailwind.config.ts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Key Components
+
+- `APIKeyManager`: Manages API keys and provider selection
+- `AdventureGame`: Main game logic and UI
+- `providers.ts`: AI service integration handlers
+
+### Available Scripts
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+## 🔐 Security
+
+- API keys are stored in browser's localStorage
+- Keys are never sent to any third-party services
+- All AI requests are processed server-side
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Google Gemini AI
+- Groq AI
+- Next.js team
+- Tailwind CSS team
+
+## 📞 Support
+
+For support, please open an issue in the GitHub repository or contact the maintainers.

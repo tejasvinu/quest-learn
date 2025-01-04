@@ -70,45 +70,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function getStoryResponse(input: string, topic: string, aiConfig: AIConfig, history: GameHistory[] = []) {
     try {
-        const prompt = `You are an engaging educational game about ${topic}. Your role is to create an 
-interactive learning experience that adapts to the user's understanding.
+        // Format history into a more structured context
+        const historyContext = history.map((h, index) => `
+Step ${index + 1}:
+Previous situation: ${h.story}
+User's choice: ${h.choice.text}
+Outcome: This led to the next part of the story...`).join('\n\n');
 
-CORE OBJECTIVES:
-- Maintain educational accuracy and age-appropriate content
-- Create branching narratives that explore different aspects of ${topic}
-- Include subtle assessments of user understanding
-- Progress naturally based on user responses
+        const prompt = `You are an AI tutor creating an interactive educational story about ${topic}.
 
-STORY GUIDELINES:
-- Each story segment should be 150-200 words
-- Include relevant facts and concepts about ${topic}
-- Create immersive scenarios that require critical thinking
-- Reference previous choices to maintain continuity
-- Include occasional "knowledge checks" within the narrative
+${history.length > 0 ? `STORY CONTEXT SO FAR:
+${historyContext}
 
-CHOICE GUIDELINES:
-- Provide 3-4 meaningful choices
-- Each choice should represent different approaches:
-  * Understanding core concepts
-  * Applying knowledge
-  * Problem-solving
-  * Exploring context and connections
+CURRENT SITUATION:
+The user chose: "${input}"
 
-RESPONSE FORMAT:
+Your task: Continue the story based on this choice. Build upon the previous events and maintain story continuity.` 
+: 'Start a new educational story from the beginning.'}
+
+IMPORTANT GUIDELINES:
+- Each response must be in valid JSON format
+- Include 3-4 meaningful choices that progress the story
+- Maintain educational accuracy while being engaging
+- Build upon previously covered concepts
+- Create natural story progression
+
+REQUIRED JSON STRUCTURE:
 {
-  "story": "your educational story text here",
-  "choices": [
-    {
-      "text": "choice text",
-      "expectedOutcome": "understanding of X concept"
+    "story": "Your next story segment here (150-200 words)",
+    "choices": [
+        {
+            "text": "First choice option",
+            "expectedOutcome": "Learning objective for this choice"
+        }
+    ],
+    "progressMetrics": {
+        "comprehensionLevel": 1-5,
+        "topicsCovered": ["list of concepts covered"],
+        "suggestedFocus": "area needing attention"
     }
-  ],
-  "currentTopics": ["specific concepts being covered"],
-  "progressMetrics": {
-    "comprehensionLevel": 1-5,
-    "topicsCovered": ["concept1", "concept2"],
-    "suggestedFocus": "area that needs more attention"
-  }
 }`;
         const response = await getAIResponse(aiConfig.provider, aiConfig.apiKey, prompt);
         return {

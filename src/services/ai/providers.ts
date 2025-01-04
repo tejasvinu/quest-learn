@@ -198,7 +198,7 @@ function parseGroqResponse(response: any): AIResponse {
         // Return standard story response format
         return {
             story: parsed.story || '',
-            choices: Array.isArray(parsed.choices) ? parsed.choices.map(choice => ({
+            choices: Array.isArray(parsed.choices) ? parsed.choices.map((choice: any) => ({
                 text: choice.text || '',
                 expectedOutcome: choice.expectedOutcome || ''
             })) : [],

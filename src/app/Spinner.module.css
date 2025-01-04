@@ -1,62 +1,65 @@
-/* Drumstick Animation */
+/* Keyframes */
 @keyframes drumstick {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-45deg); }
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-45deg); }
 }
 
-/* PlaceBrick Animation */
 @keyframes placeBrick {
-  0% { transform: translateY(50px); opacity: 0; }
-  50% { transform: translateY(0px); opacity: 1; }
-  100% { transform: translateY(0px); opacity: 1; }
+  0% { 
+    transform: translateY(20px); 
+    opacity: 0; 
+  }
+  50%, 100% { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
 }
 
-/* GrowPlant Animation */
 @keyframes growPlant {
-  0% { transform: translateY(0) scaleY(0.5) scaleX(1); border-radius: 50%; }
-  50% { transform: translateY(-24px) scaleX(0.7) scaleY(1.1); }
-  100% { transform: translateY(-32px) scaleY(1.4) scaleX(0.8); border-radius: 20% 20% 0 0; }
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.2); }
 }
 
-/* Scribble Animation */
 @keyframes scribble {
+  from { stroke-dashoffset: 1000; }
   to { stroke-dashoffset: 0; }
 }
 
-/* Animation Classes */
+/* Animation Base Classes */
 .drumstick {
-  --speed: 800ms;
-  --color: #ef4444;
-  animation: drumstick var(--speed)ms ease-in-out infinite alternate;
-  background-color: var(--color);
+  transform-origin: bottom center;
+  animation: drumstick 1.2s ease-in-out infinite;
+  will-change: transform;
 }
 
 .brick {
-  --speed: 600ms;
-  --color: #f59e0b;
-  animation: placeBrick var(--speed)ms linear infinite;
-  background-color: var(--color);
+  transform: translateY(20px);
+  opacity: 0;
+  animation: placeBrick 2s ease-out infinite;
+  will-change: transform, opacity;
 }
 
 .growPlant {
-  --speed: 1200ms;
-  --color: #10b981;
-  animation: growPlant var(--speed)ms ease-in-out infinite alternate;
-  background-color: var(--color);
+  transform-origin: bottom;
+  animation: growPlant 2s ease-in-out infinite;
+  will-change: transform;
 }
 
 .scribble {
-  --speed: 1000ms;
-  --color: #3b82f6;
-  animation: scribble var(--speed)ms linear infinite;
-  stroke: var(--color);
-  stroke-width: 2;
-  fill: none;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: scribble 3s linear infinite;
+  will-change: stroke-dashoffset;
 }
 
-/* Speed variations */
-.speedSlow { animation-duration: 800ms; }
-.speedFast { animation-duration: 400ms; }
+/* Speed Modifiers */
+.speedSlow {
+  animation-duration: 3s !important;
+}
+
+.speedFast {
+  animation-duration: 1.5s !important;
+}
 
 /* Color variations */
 .colorRed { background-color: #ef4444; }

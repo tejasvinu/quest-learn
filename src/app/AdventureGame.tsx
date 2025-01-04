@@ -3,25 +3,32 @@ import React, { useState, useEffect } from 'react';
 import { LoadingSpinner } from './Spinner';
 import { APIKeyInput } from './APIKeyInput';
 import Image from 'next/image';
-import { BookOpen, Brain } from 'lucide-react'; // Removed unused imports
+import { Brain } from 'lucide-react'; // Remove BookOpen import
+import { APIKeyManager } from './components/APIKeyManager';
+import { AIProvider } from '../types/ai';
 
-// Theme configuration
-const THEME = {
-  primary: '#6366f1',    // Indigo
-  secondary: '#4f46e5',  // Darker indigo
-  accent: '#818cf8',     // Light indigo
-  success: '#22c55e',    // Green
-  warning: '#eab308',    // Yellow
-  text: '#1e40af',       // Added missing 'text' property
-};
-
-// Define types for props
-interface GameHistory {
-  story: string;
-  choice: string;
+// Updated interfaces
+interface GameChoice {
+  text: string;
+  expectedOutcome: string;
 }
 
-interface Review {
+// Update interface at the top of the file
+interface GameHistory {
+    story: string;
+    choice: {
+        text: string;
+        expectedOutcome: string;
+        timestamp: Date;
+    };
+    metrics: {
+        comprehensionScore: number;
+        timeSpent: number;
+        topicsCovered: string[];
+    };
+}
+
+interface EnhancedReview {
   rating: number;
   overallReview: string;
   choiceAnalysis: ChoiceAnalysis[];
@@ -32,34 +39,32 @@ interface ChoiceAnalysis {
   explanation: string;
 }
 
-interface ChoiceButtonProps {
-  choice: string;
-  onClick: () => void;
-  delay: number;
-}
+// Remove ChoiceButtonProps interface
 
 interface JourneySummaryCardProps {
   history: GameHistory[];
   topic: string;
-  onRestart: () => void;
-  review: Review;
+  onRestart: () => void;  // Fixed syntax for function type
+  review: EnhancedReview;
 }
 
-// Animated choice button component with types
-const ChoiceButton: React.FC<ChoiceButtonProps> = ({ choice, onClick, delay }) => (
+// New component for enhanced choice button
+const EnhancedChoiceButton: React.FC<{
+  choice: GameChoice;
+  onClick: () => void;
+  delay: number;
+}> = ({ choice, onClick, delay }) => (
   <button
-    type="button" // Added type attribute
+    type="button"
     onClick={onClick}
-    className="group relative w-full p-6 bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-indigo-100 
-               hover:border-indigo-300 hover:bg-white/80 transition-all duration-300 
-               hover:shadow-lg hover:shadow-indigo-100/50 hover:-translate-y-1"
-    style={{ animationDelay: `${delay}ms` }}
+    className={`group relative w-full p-6 bg-white/50 backdrop-blur-sm rounded-2xl border-2 
+                border-indigo-100 hover:border-indigo-300 hover:bg-white/80 transition-all 
+                duration-300 animate-delay-${delay}`}
   >
     <div className="flex items-start gap-4">
-      <div className="mt-1 p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-        <BookOpen className="w-5 h-5 text-indigo-600" />
+      <div className="flex flex-col items-start gap-2">
+        <p className="text-lg text-gray-700">{choice.text}</p>
       </div>
-      <p className="flex-1 text-left text-lg text-gray-700">{choice}</p>
     </div>
   </button>
 );
@@ -75,22 +80,22 @@ const JourneySummaryCard: React.FC<JourneySummaryCardProps> = ({ history, topic,
         <h3 className="text-xl font-bold text-black">Overall Rating:</h3>
         <div className="ml-3 flex">
           {[...Array(5)].map((_, i) => (
-            <span key={i} className={`text-2xl ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
+            <span key={i} className={`text-2xl ${i < (review?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>
               ★
             </span>
           ))}
         </div>
       </div>
-      <p className="text-black leading-relaxed">{review.overallReview}</p>
+      <p className="text-black leading-relaxed">{review?.overallReview || 'No review available.'}</p>
     </div>
 
     <div className="space-y-8">
       {history.map((item, index) => {
-        const analysis = review.choiceAnalysis[index];
+        const analysis = review?.choiceAnalysis?.[index];
         return (
           <div key={index} className="border-l-4 border-blue-500 pl-6 py-2">
             <p className="text-black leading-relaxed mb-3">{item.story}</p>
-            <p className="text-blue-700 font-medium mb-2">Your choice: {item.choice}</p>
+            <p className="text-blue-700 font-medium mb-2">Your choice: {item.choice.text}</p>
             {analysis && (
               <p className="text-black italic leading-relaxed">{analysis.explanation}</p>
             )}
@@ -102,7 +107,7 @@ const JourneySummaryCard: React.FC<JourneySummaryCardProps> = ({ history, topic,
     <div className="mt-8">
       <h3 className="text-xl font-bold text-black mb-4">Suggested Related Topics:</h3>
       <div className="flex flex-wrap gap-3">
-        {review.suggestedTopics.map((topic, index) => (
+        {(review?.suggestedTopics || []).map((topic, index) => (
           <span key={index} className="bg-blue-100 text-blue-900 px-4 py-2 rounded-full font-medium">
             {topic}
           </span>
@@ -133,30 +138,89 @@ declare global {
 
 function AdventureGame() {
   const [apiKey, setApiKey] = useState<string>('');
+  const [provider, setProvider] = useState<AIProvider>('gemini'); // Add provider state
   const [story, setStory] = useState<string>('');
-  const [choices, setChoices] = useState<string[]>([]);
+  const [choices, setChoices] = useState<GameChoice[]>([]); // Ensure it's initialized as empty array
   const [loading, setLoading] = useState<boolean>(false);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [isComplete, setIsComplete] = useState<boolean>(false);
-  const [review, setReview] = useState<Review | null>(null);
+  const [review, setReview] = useState<EnhancedReview | null>(null);
   const [customAnswer, setCustomAnswer] = useState<string>(''); // Add new state for custom answer
+  const [gameMetrics, setGameMetrics] = useState<{
+    comprehensionLevel: number;
+    topicsCovered: string[];
+    suggestedFocus: string;
+  }>({
+    comprehensionLevel: 0,
+    topicsCovered: [],
+    suggestedFocus: '',
+  });
+  const [apiKeys, setApiKeys] = useState<{ gemini?: string; groq?: string }>({});
+  const [showKeyAlert, setShowKeyAlert] = useState(false);
 
+  // Update useEffect for loading keys and provider
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('geminiApiKey');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
+    const savedKeys = localStorage.getItem('aiKeys');
+    const savedProvider = localStorage.getItem('aiProvider') as AIProvider;
+    
+    if (savedKeys) {
+      const keys = JSON.parse(savedKeys);
+      setApiKeys(keys);
+      
+      // Set the current provider's key if available
+      if (savedProvider && keys[savedProvider]) {
+        setApiKey(keys[savedProvider]);
+        setProvider(savedProvider);
+      } else if (keys.gemini) {
+        // Default to gemini if available
+        setApiKey(keys.gemini);
+        setProvider('gemini');
+      } else if (keys.groq) {
+        // Fall back to groq if available
+        setApiKey(keys.groq);
+        setProvider('groq');
+      }
     }
   }, []);
 
-  const handleApiKeySubmit = (key: string) => {
-    localStorage.setItem('geminiApiKey', key);
-    setApiKey(key);
+  const handleApiKeySubmit = (config: { provider: AIProvider; apiKey: string }) => {
+    localStorage.setItem('aiApiKey', config.apiKey);
+    localStorage.setItem('aiProvider', config.provider);
+    setApiKey(config.apiKey);
+    setProvider(config.provider);
+  };
+
+  // Update handler for API key changes
+  const handleUpdateApiKeys = (newKeys: { gemini?: string; groq?: string }) => {
+    setApiKeys(newKeys);
+    if (newKeys[provider]) {
+      setApiKey(newKeys[provider]!);
+      setShowKeyAlert(false);
+    }
+    localStorage.setItem('aiKeys', JSON.stringify(newKeys));
+  };
+
+  // Update handler for provider changes
+  const handleProviderChange = (newProvider: AIProvider) => {
+    setProvider(newProvider);
+    if (apiKeys[newProvider]) {
+      setApiKey(apiKeys[newProvider]!);
+      setShowKeyAlert(false);
+    } else {
+      setApiKey('');
+      setShowKeyAlert(true);
+    }
+    localStorage.setItem('aiProvider', newProvider);
   };
 
   const startNewStory = async () => {
-    if (!selectedTopic || !apiKey) return;
+    if (!selectedTopic) return;
+    if (!apiKeys[provider]) {
+      setShowKeyAlert(true);
+      return;
+    }
     setLoading(true);
     setGameStarted(true);
     try {
@@ -166,7 +230,8 @@ function AdventureGame() {
         body: JSON.stringify({ 
           input: 'Start a new story', 
           topic: selectedTopic,
-          apiKey 
+          apiKey,
+          provider // Add provider to request
         }),
       });
       const data = await response.json();
@@ -179,12 +244,23 @@ function AdventureGame() {
     }
   };
 
-  const makeChoice = async (choice: string) => {
-    if (!choice.trim()) return;
+  const makeChoice = async (choiceText: string) => {
+    if (!choiceText.trim()) return;
     setLoading(true);
     
-    // Create new history entry but don't update state yet
-    const newHistoryEntry = { story, choice };
+    const newHistoryEntry = {
+      story,
+      choice: {
+        text: choiceText,
+        expectedOutcome: choices.find(c => c.text === choiceText)?.expectedOutcome || 'continue learning',
+        timestamp: new Date()
+      },
+      metrics: {
+        comprehensionScore: gameMetrics.comprehensionLevel,
+        timeSpent: 0, // Calculate time spent
+        topicsCovered: gameMetrics.topicsCovered
+      }
+    };
     const updatedHistory = [...gameHistory, newHistoryEntry];
     
     try {
@@ -192,19 +268,22 @@ function AdventureGame() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          input: choice, 
+          input: choiceText, 
           topic: selectedTopic,
           apiKey,
+          provider, // Add provider to request
           history: updatedHistory // Send the updated history
         }),
       });
       const data = await response.json();
       
-      // Only update states after successful response
       setGameHistory(updatedHistory);
       setStory(data.story);
       setChoices(data.choices);
       setCustomAnswer('');
+      if (data.metrics) {
+        setGameMetrics(data.metrics);
+      }
     } catch (error) {
       console.error('Error making choice:', error);
     } finally {
@@ -222,7 +301,8 @@ function AdventureGame() {
           history: gameHistory, 
           topic: selectedTopic, 
           isFinal: true,
-          apiKey 
+          apiKey,
+          provider // Add provider to request
         }),
       });
       const finalReview = await response.json();
@@ -244,32 +324,48 @@ function AdventureGame() {
     setSelectedTopic('');
   };
 
-  if (!apiKey) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex flex-col items-center gap-8 mb-12">
-            <div className="relative w-48 h-48 bg-white rounded-full shadow-xl 
-                          flex items-center justify-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
-              <Brain className="w-24 h-24 text-indigo-500" />
-            </div>
-            <h1 className="text-6xl font-bold text-primary mb-3">
-              QuestLearn
-            </h1>
-            <p className="text-2xl text-text">
-              Embark on a Journey of Interactive Discovery
-            </p>
-          </div>
-          <APIKeyInput onSubmit={handleApiKeySubmit} />
-        </div>
-      </div>
-    );
-  }
+  const renderChoices = () => (
+    <div className="space-y-4">
+      {Array.isArray(choices) && choices.map((choice, index) => (
+        <EnhancedChoiceButton
+          key={index}
+          choice={choice}
+          onClick={() => makeChoice(choice.text)}
+          delay={index * 100}
+        />
+      ))}
+    </div>
+  );
+
+  // Memoize the LoadingSpinner usage
+  const MemoizedLoadingSpinner = React.memo(LoadingSpinner);
+
+  const getLoadingText = () => {
+    if (!gameStarted) {
+      return "Brewing a potent mix of knowledge and adventure...";
+    }
+    if (isComplete) {
+      return "Consulting the Council of Wise AI for your review...";
+    }
+    return [
+      "Channeling the wisdom of the digital sages...",
+      "Plotting your next intellectual twist...",
+      "Consulting the ancient scrolls of data...",
+      "Rolling the dice of knowledge...",
+    ][Math.floor(Math.random() * 4)];
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
+      <APIKeyManager
+        onUpdateKeys={handleUpdateApiKeys}
+        onProviderChange={handleProviderChange}
+        initialKeys={apiKeys}
+        currentProvider={provider}
+        className="transition-transform duration-300"
+        showAlert={showKeyAlert}
+      />
+      <div className="max-w-5xl mx-auto pl-16">
         {/* Header */}
         <div className="flex justify-between items-center mb-12 animate-fadeIn">
           <div className="flex items-center gap-6">
@@ -291,15 +387,6 @@ function AdventureGame() {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => handleApiKeySubmit('')}
-            className="px-6 py-3 text-sm font-medium bg-white hover:bg-blue-50 rounded-xl 
-                     border border-blue-200 transition-all duration-300 hover:shadow-lg 
-                     hover:scale-105 active:scale-95 text-primary"
-          >
-            Change API Key
-          </button>
         </div>
 
         {/* Main content */}
@@ -307,32 +394,61 @@ function AdventureGame() {
           <div className="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-10 animate-fadeIn
                          border border-blue-200">
             <h2 className="text-4xl font-bold mb-8 animate-slideIn text-primary">
-              Choose Your Learning Path
+              Configure Your Learning Journey
             </h2>
-            <input
-              type="text"
-              value={selectedTopic}
-              onChange={(e) => setSelectedTopic(e.target.value)}
-              placeholder="e.g. French Revolution, Machine Learning, Ethics in AI..."
-              className="w-full text-accent-700 p-5 border-2 border-accent-200 rounded-xl mb-8 
-                       focus:border-accent-400 focus:ring-4 focus:ring-accent-100 transition-all duration-300
-                       placeholder:text-accent-400 text-lg animate-slideIn [animation-delay:200ms]"
-            />
-            <button
-              type="button"
-              onClick={startNewStory}
-              disabled={!selectedTopic.trim()}
-              className="w-full p-5 bg-accent-700 text-white text-lg font-medium rounded-xl 
-                       hover:bg-accent-600 disabled:opacity-50 disabled:cursor-not-allowed 
-                       transition-all duration-300 hover:shadow-lg hover:shadow-accent-300/20
-                       hover:scale-[1.02] active:scale-[0.98] animate-slideIn [animation-delay:400ms]"
-            >
-              Begin Your Adventure
-            </button>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  AI Provider
+                </label>
+                <select
+                  value={provider}
+                  onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+                  className="w-full p-4 text-lg border-2 border-accent-200 rounded-xl 
+                           focus:border-accent-400 focus:ring-4 focus:ring-accent-100
+                           transition-all duration-300"
+                >
+                  <option value="gemini">Google Gemini</option>
+                  <option value="groq">Groq</option>
+                </select>
+                {showKeyAlert && (
+                  <p className="mt-2 text-sm text-yellow-600">
+                    Please configure the API key for this provider in the sidebar
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Learning Topic
+                </label>
+                <input
+                  type="text"
+                  value={selectedTopic}
+                  onChange={(e) => setSelectedTopic(e.target.value)}
+                  placeholder="e.g. French Revolution, Machine Learning, Ethics in AI..."
+                  className="w-full text-accent-700 p-4 border-2 border-accent-200 rounded-xl 
+                           focus:border-accent-400 focus:ring-4 focus:ring-accent-100
+                           transition-all duration-300 text-lg"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={startNewStory}
+                disabled={!selectedTopic.trim()}
+                className="w-full p-5 bg-accent-700 text-white text-lg font-medium rounded-xl 
+                         hover:bg-accent-600 disabled:opacity-50 disabled:cursor-not-allowed 
+                         transition-all duration-300 hover:shadow-lg hover:shadow-accent-300/20
+                         hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Begin Your Adventure
+              </button>
+            </div>
           </div>
         ) : loading ? (
           <div className="flex justify-center items-center p-16 animate-float">
-            <LoadingSpinner label="Crafting your adventure..." />
+            <MemoizedLoadingSpinner label={getLoadingText()} />
           </div>
         ) : isComplete ? (
           <JourneySummaryCard 
@@ -374,41 +490,32 @@ function AdventureGame() {
               <p className="text-accent-700 leading-relaxed text-xl animate-slideIn">{story}</p>
             </div>
             
-            <div className="space-y-4">
-              {choices.map((choice, index) => (
-                <ChoiceButton
-                  key={index}
-                  choice={choice}
-                  onClick={() => makeChoice(choice)}
-                  delay={index * 100}
-                />
-              ))}
+            {renderChoices()}
               
-              {/* Add custom answer input */}
-              <div className="mt-6 space-y-2">
-                <p className="text-sm text-accent-600 font-medium">Or write your own response:</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customAnswer}
-                    onChange={(e) => setCustomAnswer(e.target.value)}
-                    placeholder="Enter your own answer..."
-                    className="flex-1 p-4 text-accent-700 border-2 border-accent-200 rounded-xl
-                             focus:border-accent-400 focus:ring-4 focus:ring-accent-100 
-                             transition-all duration-300"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => makeChoice(customAnswer)}
-                    disabled={!customAnswer.trim()}
-                    className="px-6 py-3 bg-accent-600 text-white rounded-xl font-medium
-                             disabled:opacity-50 disabled:cursor-not-allowed
-                             hover:bg-accent-700 transition-all duration-300
-                             hover:shadow-lg hover:scale-105 active:scale-95"
-                  >
-                    Submit
-                  </button>
-                </div>
+            {/* Add custom answer input */}
+            <div className="mt-6 space-y-2">
+              <p className="text-sm text-accent-600 font-medium">Or write your own response:</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customAnswer}
+                  onChange={(e) => setCustomAnswer(e.target.value)}
+                  placeholder="Enter your own answer..."
+                  className="flex-1 p-4 text-accent-700 border-2 border-accent-200 rounded-xl
+                           focus:border-accent-400 focus:ring-4 focus:ring-accent-100 
+                           transition-all duration-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => makeChoice(customAnswer)}
+                  disabled={!customAnswer.trim()}
+                  className="px-6 py-3 bg-accent-600 text-white rounded-xl font-medium
+                           disabled:opacity-50 disabled:cursor-not-allowed
+                           hover:bg-accent-700 transition-all duration-300
+                           hover:shadow-lg hover:scale-105 active:scale-95"
+                >
+                  Submit
+                </button>
               </div>
             </div>
           </div>

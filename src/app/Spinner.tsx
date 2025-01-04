@@ -25,17 +25,16 @@ interface SpinnerProps {
 
 const Drummer: React.FC<SpinnerProps> = ({ speed = 800, color = '#ef4444' }) => {
   const speedClass = speed <= 400 ? styles.speedFast : styles.speedSlow;
-  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`];
+  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`] || styles.colorRed;
 
   return (
-    <div
-      aria-label="Loading"
-      role="status"
-      className="flex flex-col items-center justify-center p-4 space-y-2"
-    >
+    <div aria-label="Loading" role="status" className="flex flex-col items-center justify-center p-4 space-y-2">
       <div className="sr-only">Loading Drummer...</div>
       <div className="relative flex items-end justify-center space-x-4">
-        <div className={`${styles.drumstick} ${styles.drumstickElement} ${speedClass} ${colorClass}`} />
+        <div 
+          className={`${styles.drumstickElement} ${styles.drumstick} ${speedClass} ${colorClass}`}
+          style={{ backgroundColor: color }} 
+        />
       </div>
       <div className="flex space-x-4 mt-2">
         <div className="w-6 h-6 rounded-full bg-gray-300" />
@@ -48,19 +47,18 @@ const Drummer: React.FC<SpinnerProps> = ({ speed = 800, color = '#ef4444' }) => 
 
 const BrickLayer: React.FC<SpinnerProps> = ({ speed = 600, color = '#f59e0b' }) => {
   const speedClass = speed <= 400 ? styles.speedFast : styles.speedSlow;
-  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`];
+  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`] || styles.colorYellow;
 
   return (
-    <div
-      aria-label="Loading"
-      role="status"
-      className="flex flex-col items-center justify-center p-4 space-y-2"
-    >
+    <div aria-label="Loading" role="status" className="flex flex-col items-center justify-center p-4 space-y-2">
       <div className="sr-only">Loading Brick Layer...</div>
       <div className="flex flex-wrap w-32 h-16 bg-transparent relative overflow-hidden border-2 border-gray-200">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="w-1/3 h-1/2 flex items-center justify-center">
-            <div className={`${styles.brick} ${styles.brickElement} ${speedClass} ${colorClass}`} />
+            <div 
+              className={`${styles.brickElement} ${styles.brick} ${speedClass} ${colorClass}`}
+              style={{ backgroundColor: color }}
+            />
           </div>
         ))}
       </div>
@@ -70,18 +68,17 @@ const BrickLayer: React.FC<SpinnerProps> = ({ speed = 600, color = '#f59e0b' }) 
 
 const Gardener: React.FC<SpinnerProps> = ({ speed = 1200, color = '#10b981' }) => {
   const speedClass = speed <= 400 ? styles.speedFast : styles.speedSlow;
-  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`];
+  const colorClass = styles[`color${color.charAt(1).toUpperCase()}${color.slice(2)}`] || styles.colorGreen;
 
   return (
-    <div
-      aria-label="Loading"
-      role="status"
-      className="flex flex-col items-center justify-center p-4"
-    >
+    <div aria-label="Loading" role="status" className="flex flex-col items-center justify-center p-4">
       <div className="sr-only">Loading Gardener...</div>
       <div className="relative w-16 h-16 flex items-end justify-center">
         <div className="absolute bottom-0 w-full h-2 bg-gray-400" />
-        <div className={`${styles.growPlant} ${styles.plantElement} ${speedClass} ${colorClass}`} />
+        <div 
+          className={`${styles.plantElement} ${styles.growPlant} ${speedClass} ${colorClass}`}
+          style={{ backgroundColor: color }}
+        />
       </div>
     </div>
   );
@@ -89,19 +86,16 @@ const Gardener: React.FC<SpinnerProps> = ({ speed = 1200, color = '#10b981' }) =
 
 const Scribbler: React.FC<SpinnerProps> = ({ speed = 1000, color = '#3b82f6' }) => {
   const speedClass = speed <= 400 ? styles.speedFast : styles.speedSlow;
-  const colorClass = styles[`stroke${color.charAt(1).toUpperCase()}${color.slice(2)}`];
+  const colorClass = styles[`stroke${color.charAt(1).toUpperCase()}${color.slice(2)}`] || styles.strokeBlue;
 
   return (
-    <div
-      aria-label="Loading"
-      role="status"
-      className="flex flex-col items-center justify-center p-4"
-    >
+    <div aria-label="Loading" role="status" className="flex flex-col items-center justify-center p-4">
       <div className="sr-only">Loading Scribbler...</div>
       <svg width="64" height="64" viewBox="0 0 64 64">
         <path
           d="M32 32 C 32 16, 48 16, 48 32 C 48 48, 16 48, 16 32 C 16 16, 32 16, 32 32 Z"
-          className={`${styles.scribble} ${styles.scribblePath} ${speedClass} ${colorClass}`}
+          className={`${styles.scribblePath} ${styles.scribble} ${speedClass} ${colorClass}`}
+          style={{ stroke: color }}
         />
       </svg>
     </div>

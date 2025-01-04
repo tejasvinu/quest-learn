@@ -1,17 +1,19 @@
 "use client";
 import { useState } from 'react';
+import { AIProvider } from '../types/ai';
 
 interface APIKeyInputProps {
-  onSubmit: (apiKey: string) => void;
-  initialKey?: string;
+  onSubmit: (config: { provider: AIProvider; apiKey: string }) => void;
+  initialConfig?: { provider: AIProvider; apiKey: string };
 }
 
-export function APIKeyInput({ onSubmit, initialKey }: APIKeyInputProps) {
-  const [apiKey, setApiKey] = useState(initialKey || '');
+export function APIKeyInput({ onSubmit, initialConfig }: APIKeyInputProps) {
+  const [apiKey, setApiKey] = useState(initialConfig?.apiKey || '');
+  const [provider, setProvider] = useState<AIProvider>(initialConfig?.provider || 'gemini');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(apiKey);
+    onSubmit({ provider, apiKey });
   };
 
   return (
@@ -20,30 +22,30 @@ export function APIKeyInput({ onSubmit, initialKey }: APIKeyInputProps) {
       <h2 className="text-4xl font-extrabold text-accent-700 mb-8 text-center animate-slideIn">
         Begin Your Learning Journey
       </h2>
-      <p className="text-accent-500 text-center mb-8 animate-slideIn [animation-delay:200ms]">
-        Enter your API key to unlock personalized educational adventures
-      </p>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="relative group animate-slideIn [animation-delay:400ms]">
+        <div className="space-y-4">
+          <select
+            value={provider}
+            onChange={(e) => setProvider(e.target.value as AIProvider)}
+            className="w-full p-4 border-2 border-accent-200 rounded-xl"
+          >
+            <option value="gemini">Google Gemini</option>
+            <option value="groq">Groq</option>
+          </select>
+          
           <input
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter your Gemini API key"
-            className="w-full text-accent-700 p-4 pl-5 border-2 border-accent-200 bg-white rounded-xl 
-                     focus:border-accent-400 focus:ring-4 focus:ring-accent-100 transition-all duration-300
-                     placeholder:text-accent-400"
+            placeholder={`Enter your ${provider === 'gemini' ? 'Gemini' : 'Groq'} API key`}
+            className="w-full text-accent-700 p-4 pl-5 border-2 border-accent-200 rounded-xl"
           />
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-accent-200 to-accent-300 opacity-0 
-                        group-hover:opacity-10 transition-opacity duration-500 pointer-events-none"></div>
         </div>
+        
         <button
           type="submit"
           disabled={!apiKey.trim()}
-          className="w-full p-4 bg-accent-700 text-white font-medium rounded-xl
-                   disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300
-                   hover:bg-accent-600 active:bg-accent-800 animate-slideIn [animation-delay:600ms]
-                   hover:shadow-lg hover:shadow-accent-300/20"
+          className="w-full p-4 bg-accent-700 text-white font-medium rounded-xl"
         >
           Start Adventure
         </button>

@@ -1,0 +1,96 @@
+/* Drumstick Animation */
+@keyframes drumstick {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-45deg); }
+}
+
+/* PlaceBrick Animation */
+@keyframes placeBrick {
+  0% { transform: translateY(50px); opacity: 0; }
+  50% { transform: translateY(0px); opacity: 1; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
+
+/* GrowPlant Animation */
+@keyframes growPlant {
+  0% { transform: translateY(0) scaleY(0.5) scaleX(1); border-radius: 50%; }
+  50% { transform: translateY(-24px) scaleX(0.7) scaleY(1.1); }
+  100% { transform: translateY(-32px) scaleY(1.4) scaleX(0.8); border-radius: 20% 20% 0 0; }
+}
+
+/* Scribble Animation */
+@keyframes scribble {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Animation Classes */
+.drumstick {
+  --speed: 800ms;
+  --color: #ef4444;
+  animation: drumstick var(--speed)ms ease-in-out infinite alternate;
+  background-color: var(--color);
+}
+
+.brick {
+  --speed: 600ms;
+  --color: #f59e0b;
+  animation: placeBrick var(--speed)ms linear infinite;
+  background-color: var(--color);
+}
+
+.growPlant {
+  --speed: 1200ms;
+  --color: #10b981;
+  animation: growPlant var(--speed)ms ease-in-out infinite alternate;
+  background-color: var(--color);
+}
+
+.scribble {
+  --speed: 1000ms;
+  --color: #3b82f6;
+  animation: scribble var(--speed)ms linear infinite;
+  stroke: var(--color);
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Speed variations */
+.speedSlow { animation-duration: 800ms; }
+.speedFast { animation-duration: 400ms; }
+
+/* Color variations */
+.colorRed { background-color: #ef4444; }
+.colorYellow { background-color: #f59e0b; }
+.colorGreen { background-color: #10b981; }
+.colorBlue { background-color: #3b82f6; }
+
+/* Color variations for SVG */
+.strokeRed { stroke: #ef4444; }
+.strokeYellow { stroke: #f59e0b; }
+.strokeGreen { stroke: #10b981; }
+.strokeBlue { stroke: #3b82f6; }
+
+/* Component specific styles */
+.drumstickElement {
+  width: 0.5rem;
+  height: 2rem;
+  border-radius: 0.375rem 0.375rem 0 0;
+  transform-origin: bottom;
+}
+
+.brickElement {
+  width: 1.25rem;
+  height: 0.75rem;
+}
+
+.plantElement {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  margin-bottom: 0;
+}
+
+.scribblePath {
+  stroke-width: 2;
+  fill: none;
+}
